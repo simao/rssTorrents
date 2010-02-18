@@ -4,14 +4,10 @@
 # add new torrent files to deluge based on the time of the last added
 # torrent. The script stores the RSS item date of the last added
 # torrent and adds a new torrent to the BT client if the RSS contains
-# one or more items with a later 
+# one or more items with a later date
 #
-# Sat Jan 23 21:30:00 WET 2010
+# Thu Feb 18 19:59:49 WET 2010
 #
-
-DATEFILE = "rsstorrents.pid"
-RSSFILE = "http://pipes.yahoo.com/pipes/pipe.run?_id=uJUPF7br3RGJ7NGMPxJ3AQ&_render=rss"
-TORRENTCOMMAND = "transmission-remote -n transmission:transmission -a "
 
 import feedparser
 import pickle
@@ -19,7 +15,13 @@ from datetime import datetime
 from datetime import timedelta
 import time
 import commands
+import os.path, sys
 
+DATEFILE =  os.path.abspath(os.path.dirname(sys.argv[0])) + "/" + "rsstorrents.pid"
+RSSFILE = "http://pipes.yahoo.com/pipes/pipe.run?_id=uJUPF7br3RGJ7NGMPxJ3AQ&_render=rss"
+TORRENTCOMMAND = "transmission-remote -n transmission:transmission -a "
+
+print
 
 # Read the date, download shows from last 3 weeks if we can't read any date
 try:
@@ -58,7 +60,7 @@ lastdate = datetime.fromtimestamp(time.mktime(feedInfo.entries[0].modified_parse
 try:
     with open(DATEFILE, "wb") as f:
         pickle.dump(lastdate, f)
-        print "Saved date %s" % lastdate
+        print "Saved date %s on pid file at %s" % (lastdate, DATEFILE)
 except Exception:
     print "Could not save date of last feed"
 
