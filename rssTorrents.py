@@ -20,16 +20,16 @@ import os.path, sys
 DATEFILE =  os.path.abspath(os.path.dirname(sys.argv[0])) + "/" + "rsstorrents.pid"
 RSSFILE = "http://pipes.yahoo.com/pipes/pipe.run?_id=uJUPF7br3RGJ7NGMPxJ3AQ&_render=rss"
 TORRENTCOMMAND = "transmission-remote -n transmission:transmission -a "
+DEFAULTWEEKS = 1
 
-print
 
-# Read the date, download shows from last 3 weeks if we can't read any date
+# Read the date, download shows from last DEFAULTWEEKS weeks if we can't read any date
 try:
     with open(DATEFILE, "rb") as f:
         lastdate = pickle.load(f)
         print "Read date %s" % lastdate
 except Exception:
-    lastdate = datetime.now() - timedelta(weeks=3)
+    lastdate = datetime.now() - timedelta(weeks=DEFAULTWEEKS)
     print "Could not read date of last feed, using last 3 weeks %s" % lastdate
 
 
