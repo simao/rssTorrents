@@ -4,9 +4,9 @@
 # add new torrent files to deluge based on the time of the last added
 # torrent. The script stores the RSS item date of the last added
 # torrent and adds a new torrent to the BT client if the RSS contains
-# one or more items with a later date
+# one or more items with a later date.
 #
-# Thu Feb 18 19:59:49 WET 2010
+# Fri Feb 19 01:22:22 WET 2010
 #
 
 import feedparser
@@ -16,12 +16,18 @@ from datetime import timedelta
 import time
 import commands
 import os.path, sys
+import json
 
 DATEFILE =  os.path.abspath(os.path.dirname(sys.argv[0])) + "/" + "rsstorrents.pid"
-RSSFILE = "http://pipes.yahoo.com/pipes/pipe.run?_id=uJUPF7br3RGJ7NGMPxJ3AQ&_render=rss"
+SETTINGSFILE = "rssTorrentsSettings.json"
 TORRENTCOMMAND = "transmission-remote -n transmission:transmission -a "
 DEFAULTWEEKS = 1
 
+# Get URL from json settings file
+# This way, my pipe remains semi non-public at github
+with open(SETTINGSFILE, "rb") as f:
+    settings = json.load(f)
+    rssFile = settings.get("url")
 
 # Read the date, download shows from last DEFAULTWEEKS weeks if we can't read any date
 try:
@@ -34,7 +40,7 @@ except Exception:
 
 
 # Fetch RSS File
-feedInfo = feedparser.parse(RSSFILE)
+feedInfo = feedparser.parse(rssFile)
 
 # Fetch all items until date is later than the stored date
 # Add all files to deluge
