@@ -18,14 +18,10 @@ import commands
 import os.path, sys
 import json
 
-<<<<<<< HEAD
-DATEFILE =  os.path.abspath(os.path.dirname(sys.argv[0])) + "/" + "rsstorrents.pid"
-SETTINGSFILE = "rssTorrentsSettings.json"
-=======
 SCRIPTDIR = os.path.abspath(os.path.dirname(sys.argv[0])) + "/"
 DATEFILE = SCRIPTDIR + "rsstorrents.pid"
 SETTINGSFILE = SCRIPTDIR + "rssTorrentsSettings.json"
->>>>>>> dbf6191... Make the script read settings using a global path
+
 TORRENTCOMMAND = "transmission-remote -n transmission:transmission -a "
 DEFAULTWEEKS = 1
 
