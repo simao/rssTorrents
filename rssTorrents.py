@@ -23,10 +23,6 @@ import json
 SCRIPTDIR = os.path.abspath(os.path.dirname(sys.argv[0])) + "/"
 DATEFILE = SCRIPTDIR + "rsstorrents.pid"
 SETTINGSFILE = SCRIPTDIR + "rssTorrentsSettings.json"
-<<<<<<< HEAD
-=======
-
->>>>>>> d3655275b273e713db8bda85a2cbefb07fd338f1
 TORRENTCOMMAND = "transmission-remote -n transmission:transmission -a "
 DEFAULTWEEKS = 1
 
