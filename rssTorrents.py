@@ -18,7 +18,7 @@ from datetime import timedelta
 import time
 import commands
 import os.path, sys
-import json
+import simplejson as json
 
 SCRIPTDIR = os.path.abspath(os.path.dirname(sys.argv[0])) + "/"
 DATEFILE = SCRIPTDIR + "rsstorrents.pid"
