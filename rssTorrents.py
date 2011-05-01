@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/env python
 #
 # Python script to parse a RSS feed containing torrent files urls and
 # add new torrent files to deluge based on the time of the last added
@@ -6,11 +6,12 @@
 # torrent and adds a new torrent to the BT client if the RSS contains
 # one or more items with a later date.
 #
-# Fri Feb 19 01:22:22 WET 2010
+# TODO: Implement some type of error handling when errors are returned
+# while adding new torrents to transmission and try again
+# periodically.
 #
-# TODO: Implementar forma de guardar torrents que deram erros e voltar
-# a tentar periodicamente
-
+# Time-stamp: <17:42:16 Sun 01-05-2011 obelix>
+#
 import feedparser
 import pickle
 from datetime import datetime
@@ -19,12 +20,17 @@ import time
 import commands
 import os.path, sys
 import simplejson as json
+import logging
 
-SCRIPTDIR = os.path.abspath(os.path.dirname(sys.argv[0])) + "/"
-DATEFILE = SCRIPTDIR + "rsstorrents.pid"
-SETTINGSFILE = SCRIPTDIR + "rssTorrentsSettings.json"
+LOG_FORMAT = '[%(levelname).1s] [%(asctime)s] [%(name)s] %(message)s'
+SCRIPTDIR = os.path.abspath(os.path.dirname(sys.argv[0]))
+DATEFILE = os.path.join(SCRIPTDIR, "rsstorrents.pid")
+SETTINGSFILE = os.path.join(SCRIPTDIR, "rssTorrentsSettings.json")
 TORRENTCOMMAND = "transmission-remote -n transmission:transmission -a "
 DEFAULTWEEKS = 1
+
+logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT)
+_log = logging.getLogger(__name__)
 
 # Get URL from json settings file
 # This way, my pipe remains semi non-public at github
@@ -32,14 +38,15 @@ with open(SETTINGSFILE, "rb") as f:
     settings = json.load(f)
     rssFile = settings.get("url")
 
-# Read the date, download shows from last DEFAULTWEEKS weeks if we can't read any date
+# Read the date, download shows from last DEFAULTWEEKS weeks if we
+# can't read any date
 try:
     with open(DATEFILE, "rb") as f:
         lastdate = pickle.load(f)
-        print "Read date %s" % lastdate
+        _log.info("Read date %s" % lastdate)
 except Exception:
     lastdate = datetime.now() - timedelta(weeks=DEFAULTWEEKS)
-    print "Could not read date of last feed, using last 3 weeks %s" % lastdate
+    _log.info("Could not read date of last feed, using last 3 weeks %s" % lastdate)
 
 
 # Fetch RSS File
@@ -53,27 +60,28 @@ for entry in feedInfo.entries:
 
     if feedDate > lastdate:
         torrentURL = entry.enclosures[0]['href']
-        print "Adding torrent %s" % entry.title
+        _log.info("Adding torrent %s" % entry.title)
 
         outputstatus  = commands.getstatusoutput(TORRENTCOMMAND + torrentURL)
         if(outputstatus[0] != 0):
-            print "Error adding torrent: %s" % outputstatus[1]
+            "Error adding torrent: %s" % outputstatus[1]
         else:
             n = n + 1            
     else:
         break
 
-# Set the last date to the date of the most recent item of the RSS feed
-lastdate = datetime.fromtimestamp(time.mktime(feedInfo.entries[0].modified_parsed))
-
-try:
-    with open(DATEFILE, "wb") as f:
-        pickle.dump(lastdate, f)
-        print "Saved date %s on pid file at %s" % (lastdate, DATEFILE)
-except Exception:
-    print "Could not save date of last feed"
+if len(feedInfo.entries):
+    # Set the last date to the date of the most recent item of the RSS feed
+    lastdate = datetime.fromtimestamp(time.mktime(feedInfo.entries[0].modified_parsed))
+    try:
+        with open(DATEFILE, "wb") as f:
+            pickle.dump(lastdate, f)
+            _log.info("Saved date %s on pid file at %s" % (lastdate, DATEFILE))
+    except Exception:
+        _log.exception("Could not save date of last feed")
+else:
+    _log.info("Not saving last date, supplied feed does not contain any valid entries")
 
 # Feedback user
-print "Added %d torrents." % n
-print "Finished at %s.\n" % datetime.today()
-
+_log.info("Added %d torrents." % n)
+_log.info("Finished")
