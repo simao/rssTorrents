@@ -20,6 +20,9 @@ and place it in the same dir as rssTorrents.py.
 
 You can then run the script with "python rssTorrents.py".
 
+You can rename the included rssTorrentsSettings.json.sample file to
+rssTorrentsSettings.json and edit the url in that file.
+
 I also added this command to crontab, this script runs hourly
 downloading new torents if there are any.
 
